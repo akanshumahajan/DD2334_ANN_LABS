@@ -51,7 +51,9 @@ class Perceptron():
             self._delta_fit(data, labels)
         elif self.learning_method == "delta_no_bias":
             self._delta_fit_no_bias(data, labels)
-
+        elif self.learning_method == "delta_seq":
+            self._delta_fit_seq(data, labels)
+        
     def perceptron_fit(self, data, labels):
         '''
         Fit classifier using perceptron learning
@@ -72,6 +74,60 @@ class Perceptron():
             output = np.dot(self.weights, data) > 0
             check = output == labels
             self.update_weights(data, check, labels)
+
+
+    def _delta_fit_seq(self, data, labels, n_epochs=None):
+        
+        """Fit classifier using delta rule learning and sequential update"""
+        if not n_epochs:
+            n_epochs = self.n_epochs
+        
+        bias_ones = np.ones((len(data), 1))
+        # Add column of ones, representing bias
+        data = np.column_stack([data, bias_ones])
+
+        # Tranpose so as to match assignment instruction dimensions
+        data = data.transpose()
+        
+        # Randomizes initial weights
+        self.weights = np.random.normal(0, 0.5, (1, 3))
+        for _ in range(self.n_epochs):
+            
+            # Calculate squared errors
+            error = self.weights @ data - labels # Calculate error across all the samples using weight matrix (which changes using the sequential learning)
+            error_square_sum = float(error @ error.T)
+            self.squared_errors.append(error_square_sum)
+            # Calculate number of errors
+            preds = self.predict_array(data)
+            n_errors = np.sum(preds != labels)
+            self.n_errors.append(n_errors)
+            
+            print(error_square_sum)
+            print(self.squared_errors)
+
+
+            for i in range(len(data)):
+
+                x_bar = data[:,i] # extracting each input sequence from the data
+                x_bar = np.array([x_bar])
+                x_bar = x_bar.transpose()
+                t_bar = labels[i] # Extracting label for each input sample
+                t_bar= np.array([t_bar])
+
+
+                # x_bar = data[:,i] # extracting each input sequence from the data
+                # t_bar = labels[:,i] # Extracting label for each input sample
+                # t_bar= np.array([t_bar])
+                # print(data.shape)
+                # print(x_bar.shape)
+                # print (labels.shape)
+                # print(t_bar.shape)
+                # print(self.weights.shape)
+                # Delta learning rule with sequential update taken from assignment instructions
+                delta_weights = -(self.learning_rate *
+                    (self.weights @x_bar  - t_bar) @ (x_bar.transpose()))
+                # Update weights
+                self.weights += delta_weights
 
 
     def update_weights(self, data, check, labels):
@@ -123,6 +179,8 @@ class Perceptron():
             preds = self.predict_array(data)
             n_errors = np.sum(preds != labels)
             self.n_errors.append(n_errors)
+            print(error_square_sum)
+            print(self.squared_errors)
 
             # Delta learning rule taken from assignment instructions
             delta_weights = -(self.learning_rate *
@@ -295,20 +353,19 @@ def test_delta_learning():
     """Script for testing delta learning implementation and plotting decision boundaries."""
 
     # Set training and testing parameters
-    n_epochs = 20
+    n_epochs = 2
     learning_rate = 0.001
     n_data = 50
     n_train_samples = 25
     n_test_samples = n_data - n_train_samples
     n_trials = 5
     # learning_rule = "delta"
-    learning_rule = "delta_no_bias"
+    learning_rule = "delta"
 
     # Generate data
     data = generate_data(n_data)
     # Split data
     patterns_train, targets_train, patterns_test, targets_test = split_data(data, n_train_samples)
-
 
     # Initialize percepptron
     perceptron = Perceptron(learning_method=learning_rule, learning_rate=learning_rate, n_epochs=n_epochs)
@@ -408,6 +465,6 @@ def non_linearly_separable():
 
 if __name__ == "__main__":
     # test_perceptron_learning()
-    # test_delta_learning()
+     test_delta_learning()
     # no_bias_comparison()
-    non_linearly_separable()
+    #non_linearly_separable()
