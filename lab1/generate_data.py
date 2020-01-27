@@ -7,6 +7,7 @@ def generate_data(N, plot=False, meanA=None, meanB=None, sigmaA=None, sigmaB=Non
     '''
     Generates data of two linearly seperable classes of N samples
     '''
+
     # Set up gaussian distribution parameters
     if not meanA:
         meanA = [4, 2]
@@ -40,5 +41,4 @@ def generate_data(N, plot=False, meanA=None, meanB=None, sigmaA=None, sigmaB=Non
         plt.scatter(classB[:, 0], classB[:, 1], label="Class B")
 
         plt.plot()
-        plt.show()
     return data
