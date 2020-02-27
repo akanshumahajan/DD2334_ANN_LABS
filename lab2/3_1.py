@@ -17,12 +17,40 @@ class RBFNetwork():
     def _base_func(self, x, center):
         return np.exp(-np.linalg.norm(x-center)**2/(2*VAR**2))
 
-    def fit(self, data, f, method='batch'):
+    def fit(self, data, f, method='delta'): #Sin2 train is data and f
         self.data = np.array([data]).T
         if method == 'batch':
             phi = self.RBF(self.data, self.rbf_centers)
             self.w = np.dot(
                 np.dot(np.linalg.pinv(np.dot(phi.T, phi)), phi.T), f)
+
+        if method == 'delta':
+            self.learning_rate= 0.01
+            print((len(data)))
+            for i in range (len(data)):
+                #print((data[i]))
+                #print(data)
+                data_bar = data[i]
+                #print(data_bar)
+                #print(self.rbf_centers[:,i])
+                rbf_centres_bar=self.rbf_centers
+                #print(rbf_centres_bar)
+                #print(data_bar-rbf_centres_bar)
+                phi_dash= np.exp(-np.linalg.norm(data_bar-rbf_centres_bar)**2/(2*VAR**2)) # phi xk
+                #phi_dash=phi_dash.transpose()
+                #print((phi_dash.shape))
+                f_dash = self.w * phi_dash
+                f_dash_out= np.sum(f_dash)
+                #print(f_dash_out)
+                #print(f)
+                #print(f[i])
+                f_actual= f[i]
+                error = f_actual-f_dash_out
+                eeta_dash = 0.5*(error)**2
+                delta_w = self.learning_rate*error*phi_dash
+                #print((delta_w.shape))
+                self.w += delta_w
+                #print("Sbsrgfgbyaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", self.w)
 
             # print(w)
 
